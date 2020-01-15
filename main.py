@@ -63,6 +63,30 @@ def result_page(vacancy):
     return top_skills
 
 
+def vacancy_salary(vacancy):
+    parameters = {'text': vacancy, 'area': 1, 'page': 1}
+    count = 0
+    salary_count = 0
+    salary_average = 0
+    result = vacancy_page(parameters)
+    items = result['items']
+
+    for i in range(len(items)):
+        count += 1
+        item = items[i]
+
+        if item['salary'] is not None:
+            salary = item['salary']
+            if salary['currency'] == 'RUR':
+                if salary['from'] is not None:
+                    salary_count += 1
+                    salary_average += salary['from']
+    avg_salary = f'Средняя зарплата = {salary_average // salary_count} руб'
+    return avg_salary
+
+
 # key_word = input('Наберите ключевое слово для поиска вакансии ')
-# skills = result_page(key_word)
+# # skills = result_page(key_word)
+# s = vacancy_salary(key_word)
+# print(s)
 

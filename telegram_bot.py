@@ -1,4 +1,5 @@
 from main import result_page
+from main import vacancy_salary
 import telebot
 from settings import TG_TOKEN, proxies
 from telebot import apihelper
@@ -16,7 +17,7 @@ def send_welcome(message):
     bot.reply_to(message, greeting)
 
 
-# find skills_for file
+# find and download a file with skills
 @bot.message_handler(commands=['file'])
 def get_file(message):
     vacancy = ' '.join(message.text.split(' ')[1:])
@@ -28,12 +29,20 @@ def get_file(message):
         bot.reply_to(message, f"Didn't find file.\nPlease, start vacancy search")
 
 
+# find salary for vacancy
+@bot.message_handler(commands=['salary'])
+def get_file(message):
+    key_word = ' '.join(message.text.split(' ')[1:])
+    salary = vacancy_salary(key_word)
+    bot.reply_to(message, f"OK, let's find salary for {key_word}.\nPlease wait while searching....")
+    bot.reply_to(message, salary)
+
+
 # find key skills for vacancy
 @bot.message_handler(content_types=['text'])
 def vacancy_search(message):
     key_word = message.text
-    bot.reply_to(message, f"OK, let's find key skills for {key_word}")
-    bot.reply_to(message, 'Please wait while searching....')
+    bot.reply_to(message, f"OK, let's find key skills for {key_word}.\nPlease wait while searching....")
     skills = result_page(key_word)
     bot.reply_to(message, skills)
 
