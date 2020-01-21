@@ -46,7 +46,7 @@ def result_page(vacancy):
     requirements = []
     for i in skill_rating:
         share = float("{0:.1f}".format(i[1] * 100 / skill_count))
-        element_for_bot = f"{i[0]} {share}%,\n"
+        element_for_bot = f"{i[0]} {share}%\n"
         bot_requirements += element_for_bot
         element = {'skill': i[0], '%%': share}
         requirements.append(element)
@@ -86,7 +86,8 @@ def vacancy_salary(vacancy):
 
 
 # key_word = input('Наберите ключевое слово для поиска вакансии ')
-# # skills = result_page(key_word)
+# skills = result_page(key_word)
 # s = vacancy_salary(key_word)
 # print(s)
+# print(skills)
 

@@ -5,7 +5,7 @@ from settings import TG_TOKEN, proxies
 from telebot import apihelper
 
 # при необходимости использовать прокси
-apihelper.proxy = proxies
+# apihelper.proxy = proxies
 
 bot = telebot.TeleBot(TG_TOKEN)
 
