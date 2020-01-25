@@ -1,5 +1,5 @@
-from main import result_page
-from main import vacancy_salary
+from hh_api import result_page
+from hh_api import vacancy_salary
 import telebot
 from settings import TG_TOKEN, proxies
 from telebot import apihelper
@@ -13,7 +13,9 @@ bot = telebot.TeleBot(TG_TOKEN)
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
-    greeting = "Hi there.\nThis bot will help you to find key skills for any vacancy. Just write a vacancy name."
+    greeting = "Hi there.\n" \
+               "This bot will help you to find key skills for any vacancy. " \
+               "Just write a vacancy name."
     bot.reply_to(message, greeting)
 
 
@@ -21,12 +23,13 @@ def send_welcome(message):
 @bot.message_handler(commands=['file'])
 def get_file(message):
     vacancy = ' '.join(message.text.split(' ')[1:])
-    file_name = f"file_{vacancy}.json"
+    file_name = f"skills_for_{vacancy}.json"
     try:
         with open(f"{file_name}", 'r', encoding='utf-8') as data:
             bot.send_document(message.chat.id, data)
     except FileNotFoundError:
-        bot.reply_to(message, f"Didn't find file.\nPlease, start vacancy search")
+        bot.reply_to(message, f"Didn't find file.\n"
+                              f" Please, start vacancy search")
 
 
 # find salary for vacancy
@@ -34,7 +37,8 @@ def get_file(message):
 def get_file(message):
     key_word = ' '.join(message.text.split(' ')[1:])
     salary = vacancy_salary(key_word)
-    bot.reply_to(message, f"OK, let's find salary for {key_word}.\nPlease wait while searching....")
+    bot.reply_to(message, f"OK, let's find salary for {key_word}.\n"
+                          f"Please wait while searching....")
     bot.reply_to(message, salary)
 
 
@@ -42,7 +46,8 @@ def get_file(message):
 @bot.message_handler(content_types=['text'])
 def vacancy_search(message):
     key_word = message.text
-    bot.reply_to(message, f"OK, let's find key skills for {key_word}.\nPlease wait while searching....")
+    bot.reply_to(message, f"OK, let's find key skills for {key_word}.\n"
+                          f"Please wait while searching....")
     skills = result_page(key_word)
     bot.reply_to(message, skills)
 
