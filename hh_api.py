@@ -6,7 +6,7 @@ from collections import Counter
 
 
 def vacancy_page(parameters):
-    domain = TG_API_URL
+    domain = 'https://api.hh.ru/'
     url_vacancies = f'{domain}vacancies'
     single_page = requests.get(url_vacancies, params=parameters).json()
     return single_page
