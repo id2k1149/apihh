@@ -3,18 +3,24 @@ import json
 from settings import TG_API_URL
 import pprint
 from collections import Counter
+import sqlite3
+
+# Подключение к базе данных
+conn = sqlite3.connect('hhdb.sqlite', check_same_thread=False)
+# Создаем курсор
+cursor = conn.cursor()
 
 
 def vacancy_page(parameters):
-    domain = TG_API_URL
+    domain = 'https://api.hh.ru/'
     url_vacancies = f'{domain}vacancies'
     single_page = requests.get(url_vacancies, params=parameters).json()
     return single_page
 
 
-def result_page(vacancy):
+def result_page(vacancy, id_region):
     parameters = {'text': vacancy,
-                  'area': 1,
+                  'area': id_region,
                   'page': 1}
     count = 0
     skill_list = []
@@ -57,18 +63,16 @@ def result_page(vacancy):
 
     if bot_requirements and bot_requirements.strip():
         skills_for_bot = first_line + bot_requirements
-        output_file = f"skills_for_{vacancy}.json"
         data['vacancy'] = vacancy
         data['requirements'] = requirements
-        with open(output_file, 'w', encoding='utf-8') as json_file:
-            json.dump(data, json_file)
+
     else:
         skills_for_bot = f"Sorry, didn't find any skills for {vacancy} vacancy :("
     return skills_for_bot, requirements
 
 
-def vacancy_salary(vacancy):
-    parameters = {'text': vacancy, 'area': 1, 'page': 1}
+def vacancy_salary(vacancy, id_region):
+    parameters = {'text': vacancy, 'area': id_region, 'page': 1}
     count = 0
     salary_count = 0
     salary_average = 0
@@ -85,13 +89,17 @@ def vacancy_salary(vacancy):
                 if salary['from'] is not None:
                     salary_count += 1
                     salary_average += salary['from']
-    avg_salary = f'Средняя зарплата = {salary_average // salary_count} руб'
+
+    if salary_count == 0:
+        avg_salary = f'данных по зарплате нет'
+    else:
+        avg_salary = f'средняя зарплата {salary_average // salary_count} руб'
     return avg_salary
 
 
 # key_word = input('Наберите ключевое слово для поиска вакансии ')
 # print(key_word)
-# skills, req = result_page(key_word)
+# skills, req = result_page(key_word, 1)
 # # s = vacancy_salary(key_word)
 # # print(s)
 # # print(type(req))
