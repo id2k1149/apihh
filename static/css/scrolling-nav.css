@@ -10,3 +10,11 @@ header {
 section {
   padding: 150px 0;
 }
+
+.dot {
+  height: 25px;
+  width: 25px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
