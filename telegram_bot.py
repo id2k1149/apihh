@@ -36,7 +36,7 @@ def get_file(message):
 @bot.message_handler(commands=['salary'])
 def get_file(message):
     key_word = ' '.join(message.text.split(' ')[1:])
-    salary = vacancy_salary(key_word)
+    salary = vacancy_salary(key_word, 1)
     bot.reply_to(message, f"OK, let's find salary for {key_word}.\n"
                           f"Please wait while searching....")
     bot.reply_to(message, salary)
@@ -48,7 +48,7 @@ def vacancy_search(message):
     key_word = message.text
     bot.reply_to(message, f"OK, let's find key skills for {key_word}.\n"
                           f"Please wait while searching....")
-    skills = result_page(key_word)
+    skills = result_page(key_word, 1)
     bot.reply_to(message, skills)
 
 

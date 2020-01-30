@@ -25,9 +25,10 @@
     <div class="container">
       <img src="/static/img/circle.ico">
       <font color="white" size = "7" style="margin-left: 0.5em ">API</font>
-<!--       <img src="/static/img/hhapi-white.svg">-->
+<!--      <img src="hhapi-white.svg">-->
 <!--      <a class="navbar-brand js-scroll-trigger" href="#page-top">HH API Template</a>-->
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+              aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarResponsive">
@@ -38,7 +39,7 @@
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/form/">Форма для ввода данных</a>
           </li>
-          <li class="nav-item">
+            <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/skills_hdbk/">Справочник навыков</a>
           </li>
           <li class="nav-item">
@@ -58,32 +59,25 @@
     </div>
   </header>
 
-
-
-  <section id="form" class="bg-light">
+   <section id="form" class="bg-light">
     <div class="container">
       <div class="row">
         <div class="col-lg-8 mx-auto">
           <h2>Поиск ключевых навыков для вакансии</h2>
           <p class="lead">
                <form method="post">
-                    <input class="form-control" type="text" name="vacancy_query" value="" placeholder="строка поиска">
-                    <br>
-                    <br>
-                     <h6>Выберите город из нашей базы данных</h6>
+
+                     <h6>Выберите вакансию из нашей базы данных</h6>
                     <p>
-                        <select class="form-control" name="id_region">
-                          <!--  регион берется из БД-->
-                            {% for item in region_list %}
-                            <option value="{{item[2]}}">{{item[1]}}</option>
+                        <select class="form-control" name="vacancy_id">
+
+                            {% for item in vacancy_region_list %}
+                            <option value="{{item[0]}}">{{item[1]}} {{item[2]}}</option>
                             {% endfor %}
-<!--                            <option selected value="1">Москва</option>-->
-<!--                            <option value="2">Санкт-Петербург</option>-->
-<!--                            <option value="3">Екатеринбург</option>-->
-<!--                            <option value="4">Новосибирск</option>-->
+
                         </select>
                     </p>
-<!--                    <input class="btn btn-primary" type="submit" value="Искать вакансии">-->
+
                 <button class="btn btn-primary" type="submit">Искать</button>
                 </form>
           </p>

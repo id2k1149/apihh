@@ -39,6 +39,9 @@
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/form/">Форма для ввода данных</a>
           </li>
+            <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="/skills_hdbk/">Справочник навыков</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/contacts/">Контакты</a>
           </li>
@@ -47,20 +50,20 @@
     </div>
   </nav>
 
-  <header class="bg-primary text-white">
-    <div class="container text-center">
-      <h2>HeadHunter API</h2>
-      <p class="lead">С помощью HeadHunter API вы можете получать информацию о соискателях и компаниях,
-        <br>
-        а также использовать функциональность HeadHunter для своего сайта или приложения.</p>
-    </div>
-  </header>
-
+<!--  <header class="bg-primary text-white">-->
+<!--    <div class="container text-center">-->
+<!--      <h2>HeadHunter API</h2>-->
+<!--      <p class="lead">С помощью HeadHunter API вы можете получать информацию о соискателях и компаниях,-->
+<!--        <br>-->
+<!--        а также использовать функциональность HeadHunter для своего сайта или приложения.</p>-->
+<!--    </div>-->
+<!--  </header>-->
   <section id="about">
-    <div class="container">
+    <div class="container text-center">
       <div class="row">
         <div class="col-lg-8 mx-auto">
-          <h2>Полученные результаты для "{{key_word}}" вакансии</h2>
+          <h2>Результаты для "{{key_word}}" вакансии, <br>
+              {{query_region}}, {{salary}}</h2>
             {% if skills %}
 <!--table - таблица, tr-строка, td-столбец, th-заголовок-->
                 <table class="table">
