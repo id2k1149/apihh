@@ -1,14 +1,90 @@
 from flask import Flask, render_template, request
 from hh_api import result_page, vacancy_salary
-import sqlite3
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import create_engine
+from sqlalchemy import ForeignKey
+from sqlalchemy import Table
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+engine = create_engine('sqlite:///orm.sqlite',
+                       connect_args={'check_same_thread': False},
+                       echo=True)
+
+Base = declarative_base()
+
+
+class Regions(Base):
+    __tablename__ = 'regions'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    hh_region_id = Column(Integer)
+
+    def __init__(self, name, hh_region_id):
+        self.name = name
+        self.hh_region_id = hh_region_id
+
+    def __str__(self):
+        return f'{self.id}, {self.name}: {self.hh_region_id}'
+
+
+class Skills(Base):
+    __tablename__ = 'skills'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return f'{self.id}, {self.name}'
+
+
+class Vacancy(Base):
+    __tablename__ = 'vacancy'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    region_id = Column(Integer, ForeignKey('regions.id'))
+
+    def __init__(self, name, region_id):
+        self.name = name
+        self.region_id = region_id
+
+
+vacancy_skills = Table('vacancy_skills', Base.metadata,
+                       Column('id', Integer, primary_key=True),
+                       Column('vacancy_id', Integer, ForeignKey('vacancy.id')),
+                       Column('skill_id', Integer, ForeignKey('skills.id'))
+                       )
+
+Base.metadata.create_all(engine)
+
+Session = sessionmaker(bind=engine)
+session = Session()
+
+region_start_list = ('Москва',
+                     'Санкт-Петербург',
+                     'Екатеринбург',
+                     'Новосибирск')
+i = 1
+for each in region_start_list:
+    region_name_check = session.query(Regions).filter(
+        Regions.name == each).all()
+
+    if len(region_name_check) == 0:
+        region = Regions(each, i)
+        i += 1
+        session.add(region)
+    else:
+        continue
+
+session.commit()
 
 app = Flask(__name__)
-current_year = '2020'
 
-# Подключение к базе данных
-conn = sqlite3.connect('hhdb.sqlite', check_same_thread=False)
-# Создаем курсор
-cursor = conn.cursor()
+current_year = '2020'
 
 
 @app.route("/")
@@ -23,28 +99,20 @@ def contacts():
         'phone': '+7 (499) 648-67-44',
         'email': 'info@neural-university.ru'
     }
-    # phone_number = '+7 (499) 648-67-44'
-    # e_mail = 'info@neural-university.ru'
     return render_template('contacts.html',
-                           # phone=phone_number,
-                           # email=e_mail,
                            **neu_contacts,
                            year=current_year)
 
 
-# @app.route('/form/', methods=['GET', 'POST'])
-# def form():
-#     if request.method == 'POST':
-#         pass
-#     else:
-#         return render_template('form.html',
-#                                year=current_year)
-
-
 @app.route('/form/', methods=['GET'])
 def form_get():
-    cursor.execute('SELECT * from regions')
-    region_list = cursor.fetchall()
+    region_query = session.query(Regions).all()
+
+    region_list = []
+    for each in region_query:
+        each_list = [each.id, each.name, each.hh_region_id]
+        region_list.append(each_list)
+
     return render_template('form.html',
                            year=current_year,
                            region_list=region_list)
@@ -53,50 +121,40 @@ def form_get():
 @app.route('/form/', methods=['POST'])
 def form_post():
     key_word = request.form['vacancy_query']
-    id_region = request.form['id_region']
+
+    id_region = int(request.form['id_region'])
 
     skills_for_bot, requirements = result_page(key_word, id_region)
-    cursor.execute(
-        'SELECT name from regions where hh_region_id=?',
-        (id_region,))
-    city = cursor.fetchall()[0][0]
+
+    region_query = session.query(Regions.name).filter(Regions.hh_region_id == id_region).all()
+
+    city = region_query[0][0]
+
     salary = vacancy_salary(key_word, id_region)
 
     if len(requirements) != 0:
-        cursor.execute('SELECT * from vacancy where name=? and region_id=?',
-                       (key_word, id_region))
-        result = cursor.fetchall()
-        if len(result) == 0:
-            cursor.execute(
-                "insert into vacancy(name, region_id) VALUES (?,?)",
-                (key_word, id_region))
-            conn.commit()
-            cursor.execute(
-                'SELECT id from vacancy where name=? and region_id=?',
-                (key_word, id_region))
-            vr_id = cursor.fetchall()[0][0]
+
+        check = session.query(Vacancy).\
+            filter(Vacancy.region_id == id_region).\
+            filter(Vacancy.name == key_word).all()
+
+        if len(check) == 0:
+            vacancy = Vacancy(key_word, id_region)
+            session.add(vacancy)
+            session.commit()
+
             for each_item in requirements:
                 item_list = list(each_item.values())
                 skill = item_list[1]
-                cursor.execute(
-                    'SELECT id from skills where name=?',
-                    (skill,))
-                skill_id = cursor.fetchall()
+
+                new_query = session.query(Skills.id).filter(
+                    Skills.name == skill).all()
+                skill_id = new_query
+
                 if len(skill_id) == 0:
-                    cursor.execute(
-                        "insert into skills(name) VALUES (?)",
-                        (skill,))
-                    conn.commit()
-                    cursor.execute(
-                        'SELECT id from skills where name=?',
-                        (skill,))
-                    skill_id = cursor.fetchall()
-                sk_id = skill_id[0][0]
-                cursor.execute(
-                    "insert into vacancy_skills(vacancy_id, skill_id) VALUES "
-                    "(?,?)",
-                    (vr_id, sk_id))
-                conn.commit()
+                    new_skill = Skills(skill)
+                    session.add(new_skill)
+                    session.commit()
 
     return render_template('results.html',
                            key_word=key_word,
@@ -108,51 +166,7 @@ def form_post():
 
 @app.route('/results/')
 def results():
-
     return render_template('results.html',
-                           year=current_year)
-
-
-@app.route('/skills_hdbk/', methods=['GET'])
-def skills_get():
-    query = "select v.id, v.name, r.name from vacancy v, regions r " \
-            "where  v.region_id == r.id "
-
-    cursor.execute(query)
-    vacancy_region_list = cursor.fetchall()
-
-    return render_template('skills_hdbk.html',
-                           vacancy_region_list=vacancy_region_list,
-                           year=current_year)
-
-
-@app.route('/skills_hdbk/', methods=['POST'])
-def skills_post():
-    vac_id = request.form['vacancy_id']
-
-    cursor.execute("select s.name from vacancy_skills vs, skills s where "
-                   "vs.skill_id=s.id and vacancy_id=?", (vac_id,))
-
-    skills_list = cursor.fetchall()
-
-    cursor.execute("select v.name from vacancy v where v.id=?", (vac_id,))
-    vacancy = cursor.fetchall()[0][0]
-
-    cursor.execute("select r.name from vacancy v, regions r where "
-                   "v.region_id = r.id and v.id=?", (vac_id,))
-    city = cursor.fetchall()[0][0]
-
-    return render_template('skills_result.html',
-                           result_list=skills_list,
-                           vacancy=vacancy,
-                           city=city,
-                           year=current_year)
-
-
-@app.route('/skills_result/')
-def skills_result():
-
-    return render_template('skills_result.html',
                            year=current_year)
 
 

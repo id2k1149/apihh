@@ -3,12 +3,6 @@ import json
 from settings import TG_API_URL
 import pprint
 from collections import Counter
-import sqlite3
-
-# Подключение к базе данных
-conn = sqlite3.connect('hhdb.sqlite', check_same_thread=False)
-# Создаем курсор
-cursor = conn.cursor()
 
 
 def vacancy_page(parameters):
