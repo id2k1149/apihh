@@ -77,8 +77,6 @@ for each in region_start_list:
         region = Regions(each, i)
         i += 1
         session.add(region)
-    else:
-        continue
 
 session.commit()
 
